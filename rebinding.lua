@@ -16,10 +16,11 @@ function postresolve(dq)
         for k,v in pairs(records) do
                 if whitelistDomain:check(dq.qname) then
                         pdnslog("Not blocking whitelisted domain: "..dq.qname:toString())
-                        return false
+                        return true
                 end
                 if v.type == pdns.A and rfc1918:match(newCA(v:getContent()))
                 then
+                        pdnslog("Blocking possible rebind on "..dq.qname:toString().." because of "..v:getContent().." request from "..dq.localaddr:toString())
                         dq.appliedPolicy.policyKind = pdns.policykinds.NODATA
                         v.ttl=1
                 end
